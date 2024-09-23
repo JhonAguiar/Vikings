@@ -68,7 +68,7 @@ Ejecuta el proyecto:
 ```bash
 Copiar código
 dotnet run
-El frontend se ejecutará por defecto en https://localhost:5001.
+El frontend se ejecutará por defecto en https://localhost:7266/.
 
 4. Probar la Aplicación
 Abre un navegador y visita la dirección del frontend:
