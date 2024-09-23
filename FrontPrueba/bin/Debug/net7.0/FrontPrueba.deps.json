@@ -1,0 +1,36 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v7.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v7.0": {
+      "FrontPrueba/1.0.0": {
+        "dependencies": {
+          "SharedModels": "1.0.0"
+        },
+        "runtime": {
+          "FrontPrueba.dll": {}
+        }
+      },
+      "SharedModels/1.0.0": {
+        "runtime": {
+          "SharedModels.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "FrontPrueba/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "SharedModels/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}

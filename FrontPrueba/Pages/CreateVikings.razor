@@ -1,0 +1,217 @@
+﻿@page "/createVikings"
+
+@using FrontPrueba.Services
+@using SharedModels;
+@inject VikingService vikingService
+
+<PageTitle>Vikings</PageTitle>
+
+<h1>Show Vikings</h1>
+
+@if (vikingos == null)
+{
+    <p>Loading...</p>
+}
+else if (!vikingos.Any())
+{
+    <p>No hay vikingos disponibles.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Batallas Ganadas</th>
+                <th>Arma Favorita</th>
+                <th>Nivel de Honor</th>
+                <th>Causa de Muerte Gloriosa</th>
+                <th>Valhalla Points</th>
+                <th>Clasificacion</th>
+                <th> </th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var vikingo in vikingos)
+            {
+                <tr>
+                    <td>@vikingo.Nombre</td>
+                    <td>@vikingo.NumeroBatallasGanadas</td>
+                    <td>@vikingo.TipoArmaFavorita</td>
+                    <td>@vikingo.NivelHonor</td>
+                    <td>@vikingo.CausaMuerteGloriosa</td>
+                    <td>@vikingo.ValhallaPoints</td>
+                    <td>@vikingo.Clasificacion</td>
+                    <td>
+                        @(vikingo.ValhallaPoints > 80 ? "¡Listo para el banquete en Valhalla!" : "")
+                    </td>
+                    <td>
+                        <button @onclick="() => EditVikingo(vikingo)" class="btn-primary">Editar</button>
+                        <button @onclick="() => DeleteVikingo(vikingo)" class="btn-danger">Eliminar</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+<h1>@(isEditMode ? "Edit Viking" : "Create Viking")</h1>
+
+<EditForm Model="vikingo" OnValidSubmit="SaveVikingo">
+    <DataAnnotationsValidator />
+
+
+    <div class="row">
+        <div class="col-md-6">
+            <label>Nombre:</label>
+            <InputText @bind-Value="vikingo.Nombre" class="form-control" />
+            <ValidationMessage For="@(() => vikingo.Nombre)" />
+        </div>
+        <div class="col-md-6">
+            <label>Batallas Ganadas:</label>
+            <InputNumber @bind-Value="vikingo.NumeroBatallasGanadas" class="form-control" />
+            <ValidationMessage For="@(() => vikingo.NumeroBatallasGanadas)" />
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <label>Tipo de Arma Favorita:</label>
+            <InputText @bind-Value="vikingo.TipoArmaFavorita" class="form-control" />
+            <ValidationMessage For="@(() => vikingo.TipoArmaFavorita)" />
+        </div>
+        <div class="col-md-6">
+            <label>Nivel de Honor:</label>
+            <InputSelect @bind-Value="vikingo.NivelHonor" class="form-control">
+                <option value="">Seleccione un nivel</option>
+                <option value="bajo">Bajo</option>
+                <option value="medio">Medio</option>
+                <option value="alto">Alto</option>
+            </InputSelect>
+            <ValidationMessage For="@(() => vikingo.NivelHonor)" />
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <label>Causa de Muerte Gloriosa:</label>
+            <InputText @bind-Value="vikingo.CausaMuerteGloriosa" class="form-control" />
+            <ValidationMessage For="@(() => vikingo.CausaMuerteGloriosa)" />
+        </div>
+    </div>
+
+    <hr />
+    <div class="row">
+        <div class="col-md-6">
+        </div>
+        <div class="col-md-6">
+            <button type="submit" class="btn btn-primary btn-sm">Guardar</button>
+            <button type="button" class="btn btn-secondary btn-sm" @onclick="ClearForm">Cancelar</button>
+        </div>
+    </div>
+    <ValidationSummary />
+</EditForm>
+
+
+
+@code {
+    // Lista de vikingos
+    private List<Viking> vikingos;
+    private Viking vikingo = new Viking(); // Modelo del vikingo para crear/editar
+    private bool isEditMode = false; // Para cambiar entre crear o editar
+
+    // Método para cargar los vikingos
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadVikingos();
+    }
+
+    private async Task LoadVikingos()
+    {
+        try
+        {
+            vikingos = await vikingService.GetAllVikingos();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al cargar los vikingos: {ex.Message}");
+        }
+    }
+
+    private async Task SaveVikingo()
+    {
+        // Asignar clasificación y puntos
+        AssignClassificationAndPoints(vikingo);
+
+        // Guardar o actualizar el vikingo
+        if (isEditMode)
+        {
+            await vikingService.UpdateVikingo(vikingo);
+        }
+        else
+        {
+            await vikingService.AddVikingo(vikingo);
+        }
+
+        // Recargar la lista de vikingos después de guardar
+        await LoadVikingos();
+
+        // Limpiar el formulario
+        ClearForm();
+    }
+
+    // Método para asignar clasificación y Valhalla Points
+    private void AssignClassificationAndPoints(Viking vikingo)
+    {
+        Random random = new Random();
+        vikingo.ValhallaPoints = random.Next(0, 101); // Genera un número entero entre 0 y 100
+
+        // Asignar clasificación según el nivel de honor y batallas ganadas
+        if (vikingo.NumeroBatallasGanadas > 10 && vikingo.NivelHonor == "alto")
+        {
+            vikingo.Clasificacion = "Guerreros de Thor";
+        }
+        else if (vikingo.NumeroBatallasGanadas > 5 && vikingo.NivelHonor == "medio")
+        {
+            vikingo.Clasificacion = "Guerreros de Freyja";
+        }
+        else
+        {
+            vikingo.Clasificacion = "Guerreros de Odín";
+        }
+    }
+
+    // Método para editar un vikingo
+    private void EditVikingo(Viking vikingoToEdit)
+    {
+        vikingo = new Viking
+            {
+                Id = vikingoToEdit.Id,
+                Nombre = vikingoToEdit.Nombre,
+                NumeroBatallasGanadas = vikingoToEdit.NumeroBatallasGanadas,
+                TipoArmaFavorita = vikingoToEdit.TipoArmaFavorita,
+                NivelHonor = vikingoToEdit.NivelHonor,
+                CausaMuerteGloriosa = vikingoToEdit.CausaMuerteGloriosa,
+                Clasificacion = "Guerreros de Thor",
+                ValhallaPoints = 10
+            };
+
+        isEditMode = true;
+    }
+
+    private async Task DeleteVikingo(Viking vikingoToEdit)
+    {
+        await vikingService.DeleteVikingo(vikingoToEdit.Id);
+        isEditMode = false;
+        await LoadVikingos();
+        ClearForm();
+    }
+
+    // Limpiar el formulario
+    private void ClearForm()
+    {
+        vikingo = new Viking();
+        isEditMode = false;
+    }
+}
