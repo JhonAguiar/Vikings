@@ -50,6 +50,7 @@ La API se ejecutará por defecto en https://localhost:7002.
 
 3. Ejecutar el Frontend en Blazor
 Abre una nueva terminal y navega a la carpeta del frontend:
+El frontEnd se ejecutara por defecto en https://localhost:7266
 ```
 
 ```bash
